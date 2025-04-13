@@ -73,5 +73,40 @@ module serial_comparator_most_significant_first_using_fsm
   // but use the Finite State Machine to evaluate the result.
   // Most significant bits arrive first.
 
+  typedef enum logic [1:0] {
+    st_equal,      
+    st_less,       
+    st_greater     
+  } state_t;
+
+  state_t current_state, next_state;
+
+  always_comb begin
+    next_state = current_state;
+    case (current_state)
+      st_equal: begin
+        if (a < b)
+          next_state = st_less;
+        else if (a > b)
+          next_state = st_greater;
+        else
+          next_state = st_equal;
+      end
+      st_less:    next_state = st_less;
+      st_greater: next_state = st_greater;
+      default:    next_state = st_equal;
+    endcase
+  end
+
+  assign a_eq_b      = (current_state == st_equal) && (a == b);
+  assign a_less_b    = (current_state == st_less) || ((current_state == st_equal) && (a < b));
+  assign a_greater_b = (current_state == st_greater) || ((current_state == st_equal) && (a > b));
+
+  always_ff @(posedge clk) begin
+    if (rst)
+      current_state <= st_equal;
+    else
+      current_state <= next_state;
+  end
 
 endmodule

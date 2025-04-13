@@ -28,6 +28,31 @@ module serial_adder_with_vld
   // only if vld is also high, otherwise last should be ignored.
   //
   // When rst is high, the module should reset its internal state.
+  
+  logic current_sum;
+  logic carry_generate;
+  logic carry_in, carry_out;
 
+  // Combinational logic for sum and carry
+  assign current_sum   = a ^ b ^ carry_in;
+  assign carry_generate = a & b;
+  assign carry_out     = carry_generate | (carry_in & (a ^ b));
+
+  // Sequential logic for carry propagation
+  always_ff @(posedge clk or posedge rst) begin
+    if (rst) begin
+      carry_in <= 1'b0;
+    end
+    else if (vld) begin
+      if (last) begin
+        carry_in <= 1'b0;  // Reset carry on last valid input
+      end
+      else begin
+        carry_in <= carry_out;  // Propagate carry to next cycle
+      end
+    end
+  end
+
+  assign sum = current_sum;
 
 endmodule

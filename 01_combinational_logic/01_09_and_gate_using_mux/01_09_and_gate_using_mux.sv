@@ -29,4 +29,13 @@ module and_gate_using_mux
   // constants 0 and 1, and wire connections
 
 
+  wire zero_mux_out;
+
+  mux first_mux (
+    .d0(1'b0),
+    .d1(a),
+    .sel(b),
+    .y(o)
+  );
+
 endmodule

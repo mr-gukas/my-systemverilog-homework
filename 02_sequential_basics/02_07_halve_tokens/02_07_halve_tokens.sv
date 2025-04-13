@@ -19,5 +19,17 @@ module halve_tokens
     // a -> 110_011_101_000_1111
     // b -> 010_001_001_000_0101
 
+    reg turn; 
+
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            turn <= 1'b0; 
+        end else if (a) 
+        begin
+            turn <= ~turn; 
+        end
+    end
+
+    assign b = a & turn;
 
 endmodule

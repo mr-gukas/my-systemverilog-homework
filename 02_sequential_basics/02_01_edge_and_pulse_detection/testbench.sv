@@ -42,8 +42,9 @@ module testbench;
     `ifdef __ICARUS__
       // Uncomment the following line
       // to generate a VCD file and analyze it using GTKwave or Surfer
-
-      // $dumpvars;
+    
+      $dumpfile("out.vcd");
+      $dumpvars(0, testbench);  // Dump all signals in the testbench module
     `endif
 
     @ (negedge rst);

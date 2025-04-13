@@ -59,4 +59,34 @@ module serial_comparator_most_significant_first
   // See the testbench for the output format ($display task).
 
 
+  localparam [1:0] EQ       = 2'b00,
+                   LESS     = 2'b01,
+                   GREATER  = 2'b10;
+
+  reg [1:0] state;
+
+  always_ff @(posedge clk) begin
+    if (rst) begin
+      state <= EQ;
+    end else begin
+      case (state)
+        EQ: begin
+          if (a < b)
+            state <= LESS;
+          else if (a > b)
+            state <= GREATER;
+          else
+            state <= EQ;
+        end
+        LESS: state <= LESS;
+        GREATER: state <= GREATER;
+        default: state <= EQ;
+      endcase
+    end
+  end
+
+  assign a_less_b = (state == LESS) || ((state == EQ) && (a < b));
+  assign a_greater_b = (state == GREATER) || ((state == EQ) && (a > b));
+  assign a_eq_b = (state == EQ) && (a == b);
+
 endmodule

@@ -7,7 +7,7 @@ module round_robin_arbiter_with_2_requests
     input        clk,
     input        rst,
     input  [1:0] requests,
-    output [1:0] grants
+    output logic [1:0] grants
 );
     // Task:
     // Implement a "arbiter" module that accepts up to two requests
@@ -23,5 +23,28 @@ module round_robin_arbiter_with_2_requests
     // requests -> 01 00 10 11 11 00 11 00 11 11
     // grants   -> 01 00 10 01 10 00 01 00 10 01
 
+    logic selector;
+    
+    always_comb begin
+        case (requests)
+            2'b00: grants = 2'b00;
+            2'b01: grants = 2'b01;
+            2'b10: grants = 2'b10;
+            default: grants = selector ? 2'b01 : 2'b10; 
+        endcase
+    end
+
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            selector <= 1'b0;
+        end else begin
+            case (requests)
+                2'b01: selector <= 1'b0;
+                2'b10: selector <= 1'b1;
+                2'b11: selector <= ~selector;
+                default: selector <= selector;
+            endcase
+        end
+    end
 
 endmodule

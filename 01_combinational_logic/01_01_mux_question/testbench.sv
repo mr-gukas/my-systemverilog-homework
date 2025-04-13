@@ -26,6 +26,12 @@ module testbench;
 
     if (y !== ty)
       begin
+      //`ifdef __ICARUS__
+      $dumpvars;
+      $dumpfile("out.vcd");     
+
+      //`endif
+
         $display("FAIL %s", `__FILE__);
         $display("++ INPUT    => {%s, %s, %s, %s, %s}", `PH(d0), `PH(d1), `PH(d2), `PH(d3), `PH(sel));
         $display("++ EXPECTED => {%s}", `PH(ty));
