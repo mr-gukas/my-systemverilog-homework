@@ -86,5 +86,71 @@ module sort_three_floats (
     // The FLEN parameter is defined in the "import/preprocessed/cvw/config-shared.vh" file
     // and usually equal to the bit width of the double-precision floating-point number, FP64, 64 bits.
 
+    logic [FLEN - 1:0] w0, w1; 
+    logic [FLEN - 1:0] x1, x2; 
+    logic [FLEN - 1:0] s0, s1; 
+
+    logic u0_le_u1; // unsorted[0] <= unsorted[1]
+    logic w1_le_u2; // w1 <= unsorted[2]
+    logic w0_le_x1; // w0 <= x1
+
+    logic err01, err12, err01_again;
+
+    f_less_or_equal i_floe_01 (
+        .a   ( unsorted[0] ),
+        .b   ( unsorted[1] ),
+        .res ( u0_le_u1    ),
+        .err ( err01       )
+    );
+
+    f_less_or_equal i_floe_12 (
+        .a   ( w1          ), 
+        .b   ( unsorted[2] ),
+        .res ( w1_le_u2    ),
+        .err ( err12       )
+    );
+
+    f_less_or_equal i_floe_01_again (
+        .a   ( w0          ), 
+        .b   ( x1          ), 
+        .res ( w0_le_x1    ),
+        .err ( err01_again )
+    );
+
+    always_comb begin
+        if (u0_le_u1) begin
+            w0 = unsorted[0];
+            w1 = unsorted[1];
+        end else begin
+            w0 = unsorted[1];
+            w1 = unsorted[0];
+        end
+    end
+
+    always_comb begin
+        if (w1_le_u2) begin
+            x1 = w1;
+            x2 = unsorted[2];
+        end else begin
+            x1 = unsorted[2];
+            x2 = w1;
+        end
+    end
+
+    always_comb begin
+        if (w0_le_x1) begin
+            s0 = w0;
+            s1 = x1;
+        end else begin
+            s0 = x1;
+            s1 = w0;
+        end
+    end
+
+    assign sorted[0] = s0;
+    assign sorted[1] = s1;
+    assign sorted[2] = x2; 
+
+    assign err = err01 | err12 | err01_again;
 
 endmodule
