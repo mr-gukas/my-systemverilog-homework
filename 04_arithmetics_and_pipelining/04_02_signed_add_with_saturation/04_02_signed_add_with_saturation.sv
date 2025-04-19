@@ -36,5 +36,8 @@ module signed_add_with_saturation
   // and the arguments are negative,
   // the sum should be set to the minimum negative number.
 
+  wire [4:0] temp_sum = $signed(a) + $signed(b);
+  wire overflow = (a[3] == b[3]) && (a[3] != temp_sum[3]);
+  assign sum = overflow ? (a[3] ? 4'b1000 : 4'b0111) : temp_sum[3:0];
 
 endmodule

@@ -61,5 +61,89 @@ module formula_1_pipe_aware_fsm
     // FPGA-Systems Magazine :: FSM :: Issue ALFA (state_0)
     // You can download this issue from https://fpga-systems.ru/fsm#state_0
 
+    typedef enum logic [1:0] {
+        S_IDLE,
+        S_SQRT_A,
+        S_SQRT_B,
+        S_SQRT_C
+    } state_t;
+    
+    state_t state, next_state;
+    
+    logic [31:0] a_reg, b_reg, c_reg;
+    logic [31:0] result_acc;
+    
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            state <= S_IDLE;
+        end else begin
+            state <= next_state;
+        end
+    end
+    
+    always_comb begin
+        next_state = state;
+        
+        case (state)
+            S_IDLE: if (arg_vld) next_state = S_SQRT_A;
+            S_SQRT_A: if (isqrt_y_vld) next_state = S_SQRT_B;
+            S_SQRT_B: if (isqrt_y_vld) next_state = S_SQRT_C;
+            S_SQRT_C: if (isqrt_y_vld) next_state = S_IDLE;
+        endcase
+    end
+    
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            a_reg <= 0;
+            b_reg <= 0;
+            c_reg <= 0;
+        end else if (arg_vld && state == S_IDLE) begin
+            a_reg <= a;
+            b_reg <= b;
+            c_reg <= c;
+        end
+    end
+    
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            result_acc <= 0;
+            res_vld <= 0;
+            res <= 0;
+        end else begin
+            if (isqrt_y_vld) begin
+                if (state == S_SQRT_A) 
+                    result_acc <= {16'b0, isqrt_y};
+                else if (state == S_SQRT_B)
+                    result_acc <= result_acc + {16'b0, isqrt_y};
+                else if (state == S_SQRT_C) begin
+                    res <= result_acc + {16'b0, isqrt_y};
+                    res_vld <= 1;
+                end
+            end else begin
+                res_vld <= 0;
+            end
+        end
+    end
+    
+    // Логика входов isqrt
+    always_comb begin
+        isqrt_x_vld = 0;
+        isqrt_x = 0;
+        
+        case (state)
+            S_IDLE: begin
+                isqrt_x_vld = arg_vld;
+                isqrt_x = a;
+            end
+            S_SQRT_A: begin
+                isqrt_x_vld = isqrt_y_vld;
+                isqrt_x = b_reg;
+            end
+            S_SQRT_B: begin
+                isqrt_x_vld = isqrt_y_vld;
+                isqrt_x = c_reg;
+            end
+        endcase
+    end
 
 endmodule

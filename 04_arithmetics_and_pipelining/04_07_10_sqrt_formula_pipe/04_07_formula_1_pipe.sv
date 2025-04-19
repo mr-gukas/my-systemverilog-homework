@@ -42,5 +42,39 @@ module formula_1_pipe
     // FPGA-Systems Magazine :: FSM :: Issue ALFA (state_0)
     // You can download this issue from https://fpga-systems.ru/fsm#state_0
 
+    wire        sqrt_a_vld, sqrt_b_vld, sqrt_c_vld;
+    wire [15:0] sqrt_a_res, sqrt_b_res, sqrt_c_res;
+
+    isqrt #( .n_pipe_stages(4) ) isqrt_a_inst (
+        .clk    (clk),
+        .rst    (rst),
+        .x_vld  (arg_vld),
+        .x      (a),
+        .y_vld  (sqrt_a_vld),
+        .y      (sqrt_a_res)
+    );
+
+    isqrt #( .n_pipe_stages(4) ) isqrt_b_inst (
+        .clk    (clk),
+        .rst    (rst),
+        .x_vld  (arg_vld),
+        .x      (b),
+        .y_vld  (sqrt_b_vld),
+        .y      (sqrt_b_res)
+    );
+
+    isqrt #( .n_pipe_stages(4) ) isqrt_c_inst (
+        .clk    (clk),
+        .rst    (rst),
+        .x_vld  (arg_vld),
+        .x      (c),
+        .y_vld  (sqrt_c_vld),
+        .y      (sqrt_c_res)
+    );
+
+    assign res_vld = sqrt_a_vld;
+
+    assign res = sqrt_a_res + sqrt_b_res + sqrt_c_res;
 
 endmodule
+

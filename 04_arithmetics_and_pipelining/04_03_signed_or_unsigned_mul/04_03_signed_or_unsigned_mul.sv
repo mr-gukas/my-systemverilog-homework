@@ -53,4 +53,13 @@ module signed_or_unsigned_mul
   output [2 * n - 1:0] res
 );
 
+  // Для беззнакового умножения - просто умножаем a и b
+  wire [2*n-1:0] unsigned_result = a * b;
+  
+  wire signed [n-1:0] signed_a = a;  
+  wire signed [n-1:0] signed_b = b;
+  wire signed [2*n-1:0] signed_result = signed_a * signed_b;
+  
+  assign res = signed_mul ? signed_result : unsigned_result;
+
 endmodule
