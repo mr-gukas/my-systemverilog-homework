@@ -11,8 +11,8 @@ module put_in_order
     input  [ n_inputs - 1 : 0 ]
            [ width    - 1 : 0 ] up_data,
 
-    output                      down_vld,
-    output [ width   - 1 : 0 ]  down_data
+    output logic                      down_vld,
+    output logic [ width   - 1 : 0 ]  down_data
 );
 
     // Task:
@@ -30,5 +30,27 @@ module put_in_order
     // The idea of the block is kinda similar to the "parallel_to_serial" block
     // from Homework 2, but here block should also preserve the output order.
 
+    logic [width-1:0] fifo_queue [$];
+
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            fifo_queue = {};
+            down_vld   <= 1'b0;
+            down_data  <= '0;
+        end else begin
+            for (int i = 0; i < n_inputs; i++) begin
+                if (up_vlds[i]) begin
+                    fifo_queue.push_back(up_data[i]);
+                end
+            end
+            if (fifo_queue.size() > 0) begin
+                down_vld   <= 1'b1;
+                down_data  <= fifo_queue.pop_front();
+            end else begin
+                down_vld   <= 1'b0;
+                down_data  <= '0;
+            end
+        end
+    end
 
 endmodule
