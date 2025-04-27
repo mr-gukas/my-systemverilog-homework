@@ -23,6 +23,7 @@ module sr_alu
 
     always_comb
         case (oper)
+            `ALU_MUL : result = srcA * srcB;
             default   : result =  srcA +  srcB;
             `ALU_ADD  : result =  srcA +  srcB;
             `ALU_OR   : result =  srcA |  srcB;

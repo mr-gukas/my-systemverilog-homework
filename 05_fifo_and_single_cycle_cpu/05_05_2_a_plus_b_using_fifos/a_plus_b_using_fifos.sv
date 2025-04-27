@@ -69,15 +69,14 @@ module a_plus_b_using_fifos
 
     //------------------------------------------------------------------------
 
-    // Task: Add logic using the template below
-    //
-    // wire               sum_up_valid = ...
-    // wire               sum_up_ready;
-    // wire [width - 1:0] sum_up_data  = ...
-    //
-    // assign a_down_ready = ...
-    // assign b_down_ready = ...
-
+    // valid/ready logic for sum stage
+    wire               sum_up_valid = a_down_valid & b_down_valid;
+    wire               sum_up_ready;
+    wire [width - 1:0] sum_up_data  = a_down_data + b_down_data;
+    // pop items from both FIFOs only when sum buffer can accept and both valid
+    wire               sum_pop       = sum_up_valid & sum_up_ready;
+    assign a_down_ready = sum_pop;
+    assign b_down_ready = sum_pop;
 
     //------------------------------------------------------------------------
 
